@@ -54,5 +54,17 @@ namespace AddressBookSystem
                 }
             }
         }
+        public void DeleteContact(string name)
+        {
+            foreach (var contact in pcontacts)
+            {
+                if (contact.FirstName == name)
+                {
+                    pcontacts.Remove(contact);
+                    Console.WriteLine("---------------------------------\n!!Contact Removed!!");
+                    break;
+                }
+            }
+        }
     }
 }
