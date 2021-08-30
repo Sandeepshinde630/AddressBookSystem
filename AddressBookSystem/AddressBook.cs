@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AddressBookSystem
 {
-    class AddressBook
+    class AddressBook : Exception
     {
         public List<Contact> List = new List<Contact>();
         public void AddContact(Contact addcontact)
@@ -13,7 +14,6 @@ namespace AddressBookSystem
             List.Add(addcontact);
         }
         public Dictionary<string, Contact> DictName = new Dictionary<string, Contact>();
-
         public void StoreContact()
         {
             Console.WriteLine("Enter a unique name to your Addressbook:");
@@ -34,14 +34,22 @@ namespace AddressBookSystem
             string phonenumber = Console.ReadLine();
             Console.WriteLine("Email:");
             string email = Console.ReadLine();
+            Console.WriteLine("=================================\nCONTACT CREATED SUCCESSFULLY\n=================================");
             var newContact = new Contact(firstname, lastname, address, city, state, zipcode, phonenumber, email);
             DictName.Add(addressbookName, newContact);
+            FileIO.WriteDataToTxt(DictName);
+            FileIO.WriteDataToCSV(DictName);
         }
         public void DisplayAllContact()
         {
+            if (DictName.Count == 0)
+            {
+                Console.WriteLine("=================================\n!! ADDRESSBOOK EMPTY !!\n\nPress 1 to add contact...\n=================================");
+            }
             foreach (var element in DictName)
             {
-                Console.WriteLine("----------------\nADDRESSBOOK :\n----------------\nAddressbook Key: " + element.Key + "\nPerson's Name: " + element.Value.FirstName + " " + element.Value.LastName + "\nAddress: " + element.Value.Address + "\nCity: " + element.Value.City + "\nState: " + element.Value.State + "\nZip Code: " + element.Value.ZipCode + "\nPhone Number: " + element.Value.PhoneNumber + "\nEmail: " + element.Value.Email);
+                Console.WriteLine("----------------\nADDRESSBOOK\n----------------\nAddressbook Key: " + element.Key + "\nPerson's Name: " + element.Value.FirstName + " " + element.Value.LastName + "\nAddress: " + element.Value.Address + "\nCity: " + element.Value.City + "\nState: " + element.Value.State + "\nZip Code: " + element.Value.ZipCode + "\nPhone Number: " + element.Value.PhoneNumber + "\nEmail: " + element.Value.Email);
+                Console.WriteLine("=================================");
             }
         }
         public void EditContact()
@@ -49,9 +57,9 @@ namespace AddressBookSystem
             Console.WriteLine("Available Addressbooks are:: ");
             foreach (var key in DictName)
             {
-                Console.WriteLine(key.Key + "\n----------------");
+                Console.WriteLine(key.Key + "\n-------");
             }
-            Console.WriteLine("------------------\nEnter Name of the AddressBook you want to edit:: ");
+            Console.WriteLine("Enter Name of the AddressBook you want to edit:: ");
             string dictName = Console.ReadLine();
 
             foreach (var element in DictName)
@@ -82,22 +90,25 @@ namespace AddressBookSystem
                     Console.WriteLine("Enter new Email:");
                     string newEmail = Console.ReadLine();
                     element.Value.Email = newEmail;
-                    Console.WriteLine("---------------------------------\n!!Contact Edited!!");
+                    Console.WriteLine("=================================\nCONTACT EDITID SUCCESSFULLY\n=================================");
                 }
             }
-
         }
         public void DeleteContact()
         {
             Console.WriteLine("Enter First Name of the Contact you want to Delete:");
             string name = Console.ReadLine();
-            foreach (var contact in List)
+            foreach (var nameElement in DictName)
             {
-                if (contact.FirstName == name)
+                if (nameElement.Value.FirstName == name)
                 {
-                    List.Remove(contact);
-                    Console.WriteLine("---------------------------------\n!!Contact Removed!!");
+                    DictName.Remove(nameElement.Key);
+                    Console.WriteLine("=================================\n!! CONTACT DELETED SUCCESSFULLY !!\n=================================");
                     break;
+                }
+                else
+                {
+                    Console.WriteLine("=================================\n!! NO SUCH CONTACT FOUND YOUR ADDRESSBOOK !!\n=================================");
                 }
             }
         }
@@ -107,34 +118,48 @@ namespace AddressBookSystem
             string addressbookName = Console.ReadLine();
             Console.WriteLine("First Name:");
             string name = Console.ReadLine();
-
+            bool x = new bool();
             foreach (var element in DictName)
             {
                 if (element.Value.FirstName.Equals(name))
                 {
-                    Console.WriteLine("=================================\nEntered Person Name already exist in Addressbook in AddressBook::\n" + element.Key + "\n=================================");
+                    Console.WriteLine("=================================\nEntered Person Name already exist in Addressbook named::\n" + element.Key + "\n=================================");
+                    x = true;
                 }
-                else
+            }
+            if (x == true)
+            {
+                return;
+            }
+            if (x == false)
+            {
+                string newName = name;
+                Console.WriteLine("Last Name:");
+                string lastname = Console.ReadLine();
+                Console.WriteLine("Address:");
+                string address = Console.ReadLine();
+                Console.WriteLine("City:");
+                string city = Console.ReadLine();
+                Console.WriteLine("State:");
+                string state = Console.ReadLine();
+                Console.WriteLine("Zip Code:");
+                string zipcode = Console.ReadLine();
+                Console.WriteLine("Phone Number:");
+                string phonenumber = Console.ReadLine();
+                Console.WriteLine("Email:");
+                string email = Console.ReadLine();
+                var newContact = new Contact(newName, lastname, address, city, state, zipcode, phonenumber, email);
+                try
                 {
-                    string newName = name;
-                    Console.WriteLine("Last Name:");
-                    string lastname = Console.ReadLine();
-                    Console.WriteLine("Address:");
-                    string address = Console.ReadLine();
-                    Console.WriteLine("City:");
-                    string city = Console.ReadLine();
-                    Console.WriteLine("State:");
-                    string state = Console.ReadLine();
-                    Console.WriteLine("Zip Code:");
-                    string zipcode = Console.ReadLine();
-                    Console.WriteLine("Phone Number:");
-                    string phonenumber = Console.ReadLine();
-                    Console.WriteLine("Email:");
-                    string email = Console.ReadLine();
-                    var newContact = new Contact(newName, lastname, address, city, state, zipcode, phonenumber, email);
                     DictName.Add(addressbookName, newContact);
-                    Console.WriteLine("=================================\nDuplicate checker passed contact added successfully.\n=================================");
+                    FileIO.WriteDataToTxt(DictName);
+                    FileIO.WriteDataToCSV(DictName);
                 }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+                Console.WriteLine("===========================================\nDuplicate checker passed contact added successfully.\n===========================================");
             }
         }
         public void SearchPerson()
@@ -143,7 +168,7 @@ namespace AddressBookSystem
             string city = Console.ReadLine();
             foreach (var element in DictName)
             {
-                if (element.Value.City.Equals(city))
+                if (element.Value.City.Equals(city.ToLower()))
                 {
                     Console.WriteLine("Contact(s) in found in " + city + ":: " + element.Value.FirstName);
                 }
@@ -161,13 +186,24 @@ namespace AddressBookSystem
         {
             Console.WriteLine("Enter First Name of a Person to View his City and State::");
             string person = Console.ReadLine();
+            bool x = new bool();
             foreach (var element in DictName)
             {
-                if (element.Value.FirstName.Equals(person))
+                if (element.Value.FirstName.Equals(person.ToLower()))
                 {
-                    Console.WriteLine("\n" + person + " lives in :: '" + element.Value.City + "' City and '" + element.Value.State + "' State.\n");
+                    x = true;
                 }
-                else
+            }
+            if (x == true)
+            {
+                foreach (var element in DictName)
+                {
+                    Console.WriteLine("\n" + element.Value.FirstName + " lives in :: '" + element.Value.City + "' City and '" + element.Value.State + "' State.\n");
+                }
+            }
+            if (x == false)
+            {
+                foreach (var element in DictName)
                 {
                     Console.WriteLine("No such Person found in Addressbook.\n\nAvailable person in your addressbook are :: " + element.Value.FirstName + "\n");
                 }
@@ -180,24 +216,17 @@ namespace AddressBookSystem
             int countPerson = 0;
             foreach (var element in DictName)
             {
-                if (element.Value.City.Equals(cityState))
+                if (element.Value.City.Equals(cityState.ToLower()))
                 {
                     countPerson++;
                 }
-                if (element.Value.State.Equals(cityState))
+                if (element.Value.State.Equals(cityState.ToLower()))
                 {
                     countPerson++;
                 }
+
             }
             Console.WriteLine("\nNumber of Person found in " + cityState + " are " + countPerson);
-        }
-        public void SortByPersonName()
-        {
-            Dictionary<string, Contact> sortList = DictName.OrderBy(x => x.Value.FirstName).ToDictionary(x => x.Key, x => x.Value);
-            foreach (var element in sortList)
-            {
-                Console.WriteLine(element.Value.FirstName + " " + element.Value.LastName + " " + element.Value.PhoneNumber);
-            }
         }
         public void ChooseSort()
         {
@@ -239,6 +268,5 @@ namespace AddressBookSystem
                     break;
             }
         }
-
     }
 }
